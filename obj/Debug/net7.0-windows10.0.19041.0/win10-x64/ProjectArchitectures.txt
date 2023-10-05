@@ -1,0 +1,1 @@
+C:\Users\lukas\Plocha\gapp\gapp\gapp\gapp.csproj;x64
