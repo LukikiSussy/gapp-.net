@@ -1,4 +1,12 @@
-﻿using System.Diagnostics;
+﻿//TODO:
+//u cookies.json delete nejde file vymazat kdyz je in use - vytvorit soubor s variable, ktera bude trackovat jestli je potreba file pri pristim spusteni znovu vytvorit
+//cela getTimetable funkce
+//logic na vytvareni cookies.json a pouzivani cookies.json, kdyz uz existuje
+
+
+
+
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
