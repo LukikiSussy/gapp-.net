@@ -7,6 +7,10 @@ using Microsoft.Maui.ApplicationModel;
 using System.Threading;
 using System.IO;
 using Newtonsoft.Json;
+using NUnit.Framework.Internal;
+using static System.Net.Mime.MediaTypeNames;
+using System.Net;
+using System.Text.Json;
 
 namespace gapp
 
@@ -24,6 +28,10 @@ namespace gapp
             public static class Constants
             {
                 public const string Url = "https://gevo.edookit.net/user/login";
+#pragma warning disable CA1416 // Validate platform compatibility
+                public static string mainDir = FileSystem.Current.AppDataDirectory;
+#pragma warning restore CA1416 // Validate platform compatibility
+
             }
         }
 
@@ -44,12 +52,8 @@ namespace gapp
             var CookiesJson = new Dictionary<string, Object>(){};
             CookiesJson.Add("cookies", Cookies);
 
-            string mainDir = FileSystem.Current.AppDataDirectory;
             string fileName = "cookies.json";
-            string filePath = System.IO.Path.Combine(mainDir, fileName);
-
-//dat do global variables a zmenit u File.Remove
-
+            string filePath = System.IO.Path.Combine(Globals.Constants.mainDir, fileName);
 
 
             using FileStream outputStream = System.IO.File.OpenWrite(filePath);
@@ -63,7 +67,7 @@ namespace gapp
             await ScrapeTimetable(page);
         }
 
-
+        [Obsolete]
         private static async Task ScrapeTimetable(IPage page)
         {
             if (await page.GetByText("Přihlásit přes").IsVisibleAsync())
@@ -76,7 +80,9 @@ namespace gapp
                     // OS REMOVE
                     try
                     {
-                        File.Delete("cookies.json");
+                        string fileName = "cookies.json";
+                        string filePath = System.IO.Path.Combine(Globals.Constants.mainDir, fileName);
+                        File.Delete(filePath);
                     }
                     catch (Exception ex)
                     {
@@ -87,11 +93,14 @@ namespace gapp
             }
 
             // tohle taky nekdy to throwne error 500 (zustane to na random strance)
-            if (page.Url != "https://gevo.edookit.net/user/login")
+            if (page.Url != "https://gevo.edookit.net/user/login" && page.Url != "https://gevo.edookit.net/")
             {
+                Trace.WriteLine(page.Url);
                 try
                 {
-                    File.Delete("cookies.json");
+                    string fileName = "cookies.json";
+                    string filePath = System.IO.Path.Combine(Globals.Constants.mainDir, fileName);
+                    File.Delete(filePath);
                 }
                 catch (Exception ex)
                 {
@@ -100,11 +109,38 @@ namespace gapp
                 }
             }
 
+            List<string> data = new List<string>();
 
+            int i = 0;
             foreach (var li in await page.Locator(".hoverLesson").AllInnerTextsAsync())
             {
-                Trace.WriteLine(li);
+                string[] class_ = Regex.Replace(li, @"\s\s+", "\n").Split("\n");
+
+                //string scheduleJson = $" \"Class{i + 1}\" : {{ \"Subject\": {class_[1]}, \"Teacher\": {class_[2]}, \"Room\": {class_[3]}, \"Day\": {class_[4]}, \"Time\": {class_[5]} }}";
+                var scheduleJson = new {
+                    Subject = class_[1],
+                    Teacher = class_[2],
+                    Room = class_[3],
+                    Day = class_[4],
+                    Time = class_[5]
+                };
+
+                data.Add(scheduleJson);
+
+                i++;
             }
+
+
+            string timetableName = "timetable.json";
+            string timetablePath = System.IO.Path.Combine(Globals.Constants.mainDir, timetableName);
+
+            Trace.WriteLine(timetablePath);
+
+            using FileStream outputStream = System.IO.File.OpenWrite(timetablePath);
+            using StreamWriter streamWriter = new StreamWriter(outputStream);
+
+            var opt = new JsonSerializerOptions() { WriteIndented = true };
+            await streamWriter.WriteAsync(System.Text.Json.JsonSerializer.Serialize<List<>>(data, opt));
 
         }
 
