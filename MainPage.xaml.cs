@@ -48,6 +48,10 @@ namespace gapp
             string fileName = "cookies.json";
             string filePath = System.IO.Path.Combine(mainDir, fileName);
 
+//dat do global variables a zmenit u File.Remove
+
+
+
             using FileStream outputStream = System.IO.File.OpenWrite(filePath);
             using StreamWriter streamWriter = new StreamWriter(outputStream);
 
