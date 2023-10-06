@@ -109,14 +109,13 @@ namespace gapp
                 }
             }
 
-            List<string> data = new List<string>();
+            List<dynamic> data = new List<dynamic>();
 
             int i = 0;
             foreach (var li in await page.Locator(".hoverLesson").AllInnerTextsAsync())
             {
-                string[] class_ = Regex.Replace(li, @"\s\s+", "\n").Split("\n");
+                string[] class_ = Regex.Replace(Regex.Replace(li, @"\u00A0", " "), @"\s\s+", "\n").Split("\n");
 
-                //string scheduleJson = $" \"Class{i + 1}\" : {{ \"Subject\": {class_[1]}, \"Teacher\": {class_[2]}, \"Room\": {class_[3]}, \"Day\": {class_[4]}, \"Time\": {class_[5]} }}";
                 var scheduleJson = new {
                     Subject = class_[1],
                     Teacher = class_[2],
@@ -140,7 +139,7 @@ namespace gapp
             using StreamWriter streamWriter = new StreamWriter(outputStream);
 
             var opt = new JsonSerializerOptions() { WriteIndented = true };
-            await streamWriter.WriteAsync(System.Text.Json.JsonSerializer.Serialize<List<>>(data, opt));
+            await streamWriter.WriteAsync(System.Text.Json.JsonSerializer.Serialize<List<dynamic>>(data, opt));
 
         }
 
