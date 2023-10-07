@@ -30,13 +30,13 @@
     <AppXManifest Include="C:\Users\lukas\Plocha\gapp\gapp\gapp\bin\Debug\net7.0-windows10.0.19041.0\win10-x64\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
-      <Modified>2023-10-06T21:54:59.609</Modified>
+      <Modified>2023-10-07T18:42:34.282</Modified>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\lukas\Plocha\gapp\gapp\gapp\bin\Debug\net7.0-windows10.0.19041.0\win10-x64\resources.pri">
       <PackagePath>resources.pri</PackagePath>
-      <Modified>2023-10-06T21:40:32.632</Modified>
+      <Modified>2023-10-07T18:42:33.536</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\lukas\Plocha\gapp\gapp\gapp\bin\Debug\net7.0-windows10.0.19041.0\win10-x64\gapp.runtimeconfig.json">
       <PackagePath>gapp.runtimeconfig.json</PackagePath>
@@ -44,11 +44,11 @@
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\lukas\Plocha\gapp\gapp\gapp\bin\Debug\net7.0-windows10.0.19041.0\win10-x64\gapp.dll">
       <PackagePath>gapp.dll</PackagePath>
-      <Modified>2023-10-06T21:54:57.418</Modified>
+      <Modified>2023-10-07T18:42:31.946</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\lukas\Plocha\gapp\gapp\gapp\obj\Debug\net7.0-windows10.0.19041.0\win10-x64\apphost.exe">
       <PackagePath>gapp.exe</PackagePath>
-      <Modified>2023-10-06T21:54:57.432</Modified>
+      <Modified>2023-10-07T18:42:31.974</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\lukas\.nuget\packages\microsoft.playwright\1.38.0\.playwright\node\darwin-arm64\node">
       <PackagePath>.playwright\node\darwin-arm64\node</PackagePath>

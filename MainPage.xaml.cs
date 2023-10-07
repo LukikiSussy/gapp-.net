@@ -19,6 +19,9 @@ using NUnit.Framework.Internal;
 using static System.Net.Mime.MediaTypeNames;
 using System.Net;
 using System.Text.Json;
+using Newtonsoft.Json.Linq;
+using Microsoft.Maui.Controls.Shapes;
+using Newtonsoft.Json.Serialization;
 
 namespace gapp
 
@@ -41,38 +44,6 @@ namespace gapp
 #pragma warning restore CA1416 // Validate platform compatibility
 
             }
-        }
-
-        private static async Task CreateCookiesJson()
-        {
-            using var playwright = await Playwright.CreateAsync();
-
-            var browser = await playwright.Webkit.LaunchAsync(new() { Headless = false });
-            var context = await browser.NewContextAsync();
-            var page = await context.NewPageAsync();
-            await page.GotoAsync(Globals.Constants.Url);
-            await page.GetByText("Přihlásit přes").ClickAsync();
-            await page.GetByRole(AriaRole.Button, new() { Name = "Google" }).ClickAsync();
-            await page.WaitForURLAsync("https://gevo.edookit.net/", new() { Timeout = 900000 });
-
-            var Cookies = await context.CookiesAsync();
-
-            var CookiesJson = new Dictionary<string, Object>(){};
-            CookiesJson.Add("cookies", Cookies);
-
-            string fileName = "cookies.json";
-            string filePath = System.IO.Path.Combine(Globals.Constants.mainDir, fileName);
-
-
-            using FileStream outputStream = System.IO.File.OpenWrite(filePath);
-            using StreamWriter streamWriter = new StreamWriter(outputStream);
-
-            string json = $"{{\"cookies\": {JsonConvert.SerializeObject(Cookies, Formatting.Indented)}}}";
-
-            await streamWriter.WriteAsync(json);
-
-
-            await ScrapeTimetable(page);
         }
 
         [Obsolete]
@@ -151,12 +122,17 @@ namespace gapp
 
         }
 
-        private static async Task getTimetableAsync()
+        private static async Task GetTimetable()
         {
             using var playwright = await Playwright.CreateAsync();
 
-            var browser = await playwright.Webkit.LaunchAsync(new() { Headless = false });
-            var context = await browser.NewContextAsync();
+            var browser = await playwright.Webkit.LaunchAsync(new() { Headless = true });
+
+            string fileName = "cookies.json";
+            string filePath = System.IO.Path.Combine(Globals.Constants.mainDir, fileName);
+
+            var context = await browser.NewContextAsync(new() { StorageState = File.ReadAllText(filePath) });
+
             var page = await context.NewPageAsync();
             await page.GotoAsync(Globals.Constants.Url);
 
@@ -164,27 +140,91 @@ namespace gapp
         }
 
 
-
-
-
-
-        public static async Task Scraper()
+        private static async Task CreateCookiesJson()
         {
             using var playwright = await Playwright.CreateAsync();
+
             var browser = await playwright.Webkit.LaunchAsync(new() { Headless = false });
-
             var context = await browser.NewContextAsync();
-
             var page = await context.NewPageAsync();
-            await page.GotoAsync("https://bing.com");
-            await context.CloseAsync();
+            await page.GotoAsync(Globals.Constants.Url);
+            await page.GetByText("Přihlásit přes").ClickAsync();
+            await page.GetByRole(AriaRole.Button, new() { Name = "Google" }).ClickAsync();
+            await page.WaitForURLAsync("https://gevo.edookit.net/", new() { Timeout = 900000 });
+
+            var Cookies = await context.CookiesAsync();
+
+            string fileName = "cookies.json";
+            string filePath = System.IO.Path.Combine(Globals.Constants.mainDir, fileName);
 
 
+            using FileStream outputStream = System.IO.File.OpenWrite(filePath);
+            using StreamWriter streamWriter = new StreamWriter(outputStream);
+
+            //tady to musi byt takhle fugly, jinak by ty veci v tom jsonu meli velky pismena na zacatku a nefungovalo by to
+            string json = $"{{\"cookies\": {JsonConvert.SerializeObject(Cookies, new JsonSerializerSettings { Formatting = Formatting.Indented, ContractResolver = new CamelCasePropertyNamesContractResolver() })}}}";
+
+            await streamWriter.WriteAsync(json);
+
+
+            await ScrapeTimetable(page);
+        }
+
+        //Stackoverflow inspired code
+        private static bool IsValidJson(string path)
+        {
+            try 
+            {
+                File.ReadAllText(path);
+            }
+            catch
+            {
+                return false;
+            }
+
+            string strInput = File.ReadAllText(path);
+
+
+            if (string.IsNullOrWhiteSpace(strInput)) { return false; }
+            strInput = strInput.Trim();
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
+                (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
+            {
+                try
+                {
+                    var obj = JToken.Parse(strInput);
+                    return true;
+                }
+                catch (JsonReaderException jex)
+                {
+                    //Exception in parsing json
+                    Console.WriteLine(jex.Message);
+                    return false;
+                }
+                catch (Exception ex) //some other exception
+                {
+                    Console.WriteLine(ex.ToString());
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private void CounterBtn_Clicked(object sender, EventArgs e)
         {
-            Task func = CreateCookiesJson();
+            string fileName = "cookies.json";
+            string filePath = System.IO.Path.Combine(Globals.Constants.mainDir, fileName);
+            if (!IsValidJson(filePath))
+            {
+                Task func = CreateCookiesJson();
+            }
+            else
+            {
+                Task func = GetTimetable();
+            }
         }
     }
 }
